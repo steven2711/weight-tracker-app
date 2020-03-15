@@ -13,13 +13,14 @@
       integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
       crossorigin="anonymous"
     />
-    <title>Tracalorie</title>
+    <link rel="stylesheet" href="style.css" />
+    <title>Calorie Tracker</title>
   </head>
   <body>
     <nav>
       <div class="nav-wrapper blue">
         <div class="container">
-          <a href="#" class="brand-logo center">Fat Fuck Tracker</a>
+          <a href="#" class="brand-logo center">Calorie Tracker</a>
         </div>
       </div>
     </nav>
@@ -27,7 +28,29 @@
     <br />
 
     <div class="container">
-      <div class="card">
+      <div id="weight-card" class="card">
+        <div class="card-content">
+          <span class="card-title">Enter current weight</span>
+
+          <form class="col">
+            <div class="row">
+              <div class="input-field col s6">
+                <input
+                  type="text"
+                  placeholder="Today's weight"
+                  id="todays-weight"
+                />
+                <label for="todays-weight">Weight</label>
+              </div>
+            </div>
+            <button class="add-weight-btn btn blue darken-3">
+              <i class="fa fa-plus"></i> Add weight
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div id="meal-input-card" class="card">
         <div class="card-content">
           <span class="card-title">Add meal / Food item</span>
 
@@ -71,11 +94,30 @@
         </div>
       </div>
 
-      <h3 class="center-align">
-        Total calories: <span class="total-calories">0</span>
-      </h3>
+      <!-- current day -->
+      <div id="data-section">
+        <h3 class="center-align">
+          Total calories: <span class="total-calories">0</span>
+        </h3>
 
-      <ul id="item-list" class="collection"></ul>
+        <ul id="item-list" class="collection"></ul>
+
+        <!-- daily tracker -->
+
+        <h3 class="center-align">
+          Daily Log
+        </h3>
+
+        <ul id="daily-list" class="collection"></ul>
+
+        <!-- monthly tracker -->
+
+        <h3 class="center-align">
+          Monthly Log
+        </h3>
+
+        <ul id="monthly-list" class="collection"></ul>
+      </div>
     </div>
 
     <script

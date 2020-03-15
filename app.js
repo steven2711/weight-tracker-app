@@ -1,3 +1,53 @@
+const LogCtrl = (function() {
+  const DailyItem = function(date, weight, totalCalories) {
+    this.date = date;
+    this.weight = weight;
+    this.totalCalories = totalCalories;
+  };
+
+  const MonthlyItem = function(month, startWeight, endWeight, totalCalories) {
+    this.month = month;
+    this.startWeight = startWeight;
+    this.endWeight = endWeight;
+    this.totalCalories = totalCalories;
+  };
+
+  const data = {
+    monthlyLog: [
+      {
+        month: "Febuary",
+        startWeight: 200,
+        endWeight: 190,
+        totalCalories: 10000,
+        suggestedTotalCalories: 15000
+      },
+      {
+        month: "January",
+        startWeight: 210,
+        endWeight: 200,
+        totalCalories: 10000,
+        suggestedTotalCalories: 15000
+      }
+    ]
+  };
+
+  return {
+    logData: function() {
+      return data;
+    },
+
+    createDayLogObject: function(date, weight, calories) {
+      const newDailyLog = new DailyItem(date, weight, calories);
+
+      return newDailyLog;
+    },
+
+    createMonthLogObject: function() {
+      console.log("fix this shit");
+    }
+  };
+})();
+
 ////////////////// Storage controller
 
 const StorageCtrl = (function() {
@@ -20,6 +70,54 @@ const StorageCtrl = (function() {
       }
     },
 
+    storeDayLog: function(log) {
+      let dayLogs = [];
+
+      // cheack if items in ls
+
+      if (localStorage.getItem("dayLogs") === null) {
+        dayLogs.push(log);
+
+        localStorage.setItem("dayLogs", JSON.stringify(dayLogs));
+      } else {
+        dayLogs = JSON.parse(localStorage.getItem("dayLogs"));
+
+        dayLogs.push(log);
+
+        localStorage.setItem("dayLogs", JSON.stringify(dayLogs));
+      }
+    },
+
+    storeWeight: function(newWeight) {
+      let weight = [];
+
+      // cheack if items in ls
+
+      if (localStorage.getItem("weight") === null) {
+        weight.push(newWeight);
+
+        localStorage.setItem("weight", JSON.stringify(weight));
+      } else {
+        weight = JSON.parse(localStorage.getItem("weight"));
+
+        weight.push(newWeight);
+
+        localStorage.setItem("weight", JSON.stringify(weight));
+      }
+    },
+
+    checkWeight: function() {
+      if (localStorage.getItem("weight") === null) {
+        return false;
+      } else {
+        return true;
+      }
+    },
+
+    getWeight: function() {
+      return JSON.parse(localStorage.getItem("weight"));
+    },
+
     getItemsFromStorage: function() {
       let items;
 
@@ -30,6 +128,18 @@ const StorageCtrl = (function() {
       }
 
       return items;
+    },
+
+    getDailyLogsFromStorage: function() {
+      let dayLogs;
+
+      if (localStorage.getItem("dayLogs") === null) {
+        dayLogs = [];
+      } else {
+        dayLogs = JSON.parse(localStorage.getItem("dayLogs"));
+      }
+
+      return dayLogs;
     },
 
     updateItemStorage: function(updatedItem) {
@@ -66,6 +176,40 @@ const StorageCtrl = (function() {
       }
 
       localStorage.setItem("items", JSON.stringify(items));
+    },
+
+    checkLastOpenedDate: function() {
+      let newDate = {
+        month: new Date().getMonth() + 1,
+        day: new Date().getDate(),
+        year: new Date().getFullYear()
+      };
+
+      if (localStorage.getItem("lastOpened") === null) {
+        localStorage.setItem("lastOpened", JSON.stringify(newDate));
+      } else {
+        return JSON.parse(localStorage.getItem("lastOpened"));
+      }
+    },
+
+    updateLastOpenedDate: function(date) {
+      if (localStorage.getItem("lastOpened") === null) {
+        localStorage.setItem("lastOpened", JSON.stringify(date));
+      } else {
+        localStorage.setItem("lastOpened", JSON.stringify(date));
+      }
+    },
+
+    addCurrentWeight: function(weight) {
+      if (localStorage.getItem("weight") === null) {
+        localStorage.setItem("weight", JSON.stringify(weight));
+      } else {
+        localStorage.setItem("weight", JSON.stringify(weight));
+      }
+    },
+
+    clearWeight: function() {
+      localStorage.setItem("weight", null);
     }
   };
 })();
@@ -198,7 +342,13 @@ const UICtrl = (function() {
     itemCaloriesInput: "#item-calories",
     totalCaloriesDisplay: ".total-calories",
     listItems: "#item-list li",
-    clearBtn: ".clear-btn"
+    clearBtn: ".clear-btn",
+    weightCard: "#weight-card",
+    weightInput: "#todays-weight",
+    addWeightBtn: ".add-weight-btn",
+    dailyList: "#daily-list",
+    mealInputCard: "#meal-input-card",
+    dataSection: "#data-section"
   };
 
   return {
@@ -208,14 +358,39 @@ const UICtrl = (function() {
       items.forEach(item => {
         html += `
         <li class="collection-item" id="item-${item.id}">
+        
         <strong>${item.name}: </strong> <em>${item.calories} Calories</em>
         <a href="#" class="secondary-content"><i class="edit-item fa fa-pencil"></i></a>
+
       </li>
             `;
       });
 
       // Insert list items
       document.querySelector(UISelectors.itemList).innerHTML = html;
+    },
+
+    populateDailyLog: function(logItems) {
+      let html = "";
+
+      logItems.forEach(item => {
+        html += `
+        <li class="collection-item">
+        <div>
+        <em>${item.date}</em> </div>
+        
+        <div>
+        <strong>Weight:</strong><em>${item.weight}</em> 
+        </div>
+
+        <div>
+        <strong>Total calories:</strong><em>${item.totalCalories}/2000</em>
+        </div>
+      </li>
+            `;
+      });
+
+      document.querySelector(UISelectors.dailyList).innerHTML = html;
     },
 
     getSelectors: function() {
@@ -227,6 +402,10 @@ const UICtrl = (function() {
         name: document.querySelector(UISelectors.itemNameInput).value,
         calories: document.querySelector(UISelectors.itemCaloriesInput).value
       };
+    },
+
+    getWeightInput: function() {
+      return document.querySelector(UISelectors.weightInput).value;
     },
 
     addItemToList: function(item) {
@@ -316,18 +495,46 @@ const UICtrl = (function() {
       const item = document.querySelector(itemId);
 
       item.remove();
+    },
+
+    showCurrentWeightCard: function() {
+      document.querySelector(UISelectors.weightCard).style.display = "block";
+    },
+
+    hideCurrentWeightCard: function() {
+      document.querySelector(UISelectors.weightCard).style.display = "none";
+    },
+
+    hideMealInputAndDataSection: function() {
+      document.querySelector(UISelectors.dataSection).style.display = "none";
+
+      document.querySelector(UISelectors.mealInputCard).style.display = "none";
+    },
+
+    showMealInputAndDataSection: function() {
+      document.querySelector(UISelectors.dataSection).style.display = "block";
+
+      document.querySelector(UISelectors.mealInputCard).style.display = "block";
     }
   };
 })();
 
-///////////////// App controller
+///////////////// App controller //////////////////////////
 
-const App = (function(UICtrl, ItemCtrl, StorageCtrl) {
+const App = (function(UICtrl, ItemCtrl, StorageCtrl, LogCtrl) {
   // Load event listeners
 
   const loadEventListeners = function() {
     // Get UI selectors
     const UISelectors = UICtrl.getSelectors();
+
+    // Add/remove weight card based on data
+
+    document.addEventListener("DOMContentLoaded", checkDateAndUpdate);
+
+    document
+      .querySelector(UISelectors.addWeightBtn)
+      .addEventListener("click", addCurrentWeight);
 
     // Add item event
     document
@@ -370,6 +577,70 @@ const App = (function(UICtrl, ItemCtrl, StorageCtrl) {
     document
       .querySelector(UISelectors.deleteBtn)
       .addEventListener("click", deleteSelectedItem);
+  };
+
+  const checkDateAndUpdate = function() {
+    const year = new Date().getFullYear();
+    const month = new Date().getMonth() + 1; // months are 0 indexed
+    const day = new Date().getDate();
+
+    const currentDate = {
+      month,
+      day,
+      year
+    };
+
+    const lastOpenedDate = StorageCtrl.checkLastOpenedDate();
+    const formattedLastOpenedDate = `${lastOpenedDate.month}/${lastOpenedDate.day}/${lastOpenedDate.year}`;
+
+    //// Handle daily log ///////////////
+
+    // update daily log if its a new day
+    if (day !== lastOpenedDate.day) {
+      // grab info for daily log
+      const oldCalories = ItemCtrl.getTotalCalories();
+      const oldDate = formattedLastOpenedDate;
+      const oldWeight = StorageCtrl.getWeight();
+      // log items from yesterday
+
+      const dailyLogItem = LogCtrl.createDayLogObject(
+        oldDate,
+        oldWeight,
+        oldCalories
+      );
+
+      // add daily logged item to local storage
+
+      StorageCtrl.storeDayLog(dailyLogItem);
+
+      // clear data from item list ui & itemctrl
+      UICtrl.clearListItems();
+      ItemCtrl.clearListItems();
+
+      // clear data from item list localStorage
+      StorageCtrl.clearItemsStorage();
+
+      // show total calories
+      const totalCalories = ItemCtrl.getTotalCalories();
+      UICtrl.showTotalCalories(totalCalories);
+
+      // update last opened date
+      StorageCtrl.updateLastOpenedDate(currentDate);
+
+      // Clear weight
+
+      StorageCtrl.clearWeight();
+    }
+  };
+
+  const addCurrentWeight = function(e) {
+    e.preventDefault();
+
+    const input = UICtrl.getWeightInput();
+
+    StorageCtrl.addCurrentWeight(input);
+
+    location.reload();
   };
 
   const deleteSelectedItem = function(e) {
@@ -499,12 +770,27 @@ const App = (function(UICtrl, ItemCtrl, StorageCtrl) {
 
       UICtrl.clearEditState();
 
+      UICtrl.hideCurrentWeightCard();
+
+      if (!StorageCtrl.checkWeight()) {
+        // show weight card and hide everything else
+        UICtrl.showCurrentWeightCard();
+        UICtrl.hideMealInputAndDataSection();
+      } else {
+        UICtrl.hideCurrentWeightCard();
+        UICtrl.showMealInputAndDataSection();
+      }
+
       // Fetch items from data structure
       const items = ItemCtrl.getItems();
+
+      const dailyLogItems = StorageCtrl.getDailyLogsFromStorage();
 
       // Add to UI
 
       UICtrl.populateItemList(items);
+
+      UICtrl.populateDailyLog(dailyLogItems);
 
       const totalCalories = ItemCtrl.getTotalCalories();
 
@@ -516,7 +802,7 @@ const App = (function(UICtrl, ItemCtrl, StorageCtrl) {
       loadEventListeners();
     }
   };
-})(UICtrl, ItemCtrl, StorageCtrl);
+})(UICtrl, ItemCtrl, StorageCtrl, LogCtrl);
 
 // Initialize app
 

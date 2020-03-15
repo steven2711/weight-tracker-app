@@ -1,0 +1,8 @@
+#daily-list li {
+  display: flex;
+  justify-content: space-between;
+}
+
+#daily-list em {
+  padding: 0 5px;
+}
